@@ -1,12 +1,6 @@
 package de.appsmart;
 
-import io.restassured.response.Response;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-
-import static io.restassured.RestAssured.given;
+import org.junit.jupiter.api.*;
 
 public class API {
 
@@ -20,20 +14,25 @@ public class API {
     @Test
     @Order(1)
     void CanCreatePaymentFromFrontToPhpIntegration() {
-        HelpersAPI.setEndPoint("/create");
+        HelpersAPI.setEndPoint(HelpersAPI.createPayment);
         HelpersAPI.createPaymentFromFrontToPhpIntegrationThenJavaServerRespondsUrlSandboxWithPayPalOneToken();
         Assertions.assertEquals(201, HelpersAPI.statusCode);
         Assertions.assertNotNull(HelpersAPI.transactionID);
         Assertions.assertNotNull(HelpersAPI.redirectURL);
+    }
 
-//    }
-//
-//    @Test
-//    @Order(2)
-//    void CanCheckStatusOfTransactionIdInPHPIntegration() {
+    @Test
+    @Order(2)
+    void CanCheckStatusOfTransactionIdInPHPIntegration() {
+        HelpersAPI.setEndPoint(HelpersAPI.endPointStatus);
         HelpersAPI.checkStatusOfTransactionIdInPHPIntegration();
         Assertions.assertEquals(200, HelpersAPI.statusCode);
-        Assertions.assertEquals(HelpersAPI.transactionID, HelpersAPI.transactionID);
         Assertions.assertEquals("CREATED", HelpersAPI.status);
+    }
+
+    @AfterAll
+    public static void clearConfig() {
+        HelpersAPI.resetBaseURI();
+        HelpersAPI.resetEndPoint();
     }
 }

@@ -12,15 +12,14 @@ public class HelpersAPI {
     public static String jsonPathTerm;
 
     //Endpoints
+    public static String createPayment = "/create";
     public static String endPointStatus = "/status?transaction_id=";
-    public static String endPointAuth = "login?authClient=loki";
-
 
     //Response items
     public static String transactionID;
     public static String redirectURL;
-    public static Integer statusCode = null; //Int
     public static String status;
+    public static Integer statusCode = null;
 
     //Sets Base URI
     public static void setBaseURI() {
@@ -30,7 +29,6 @@ public class HelpersAPI {
     //Sets endpoint
     public static void setEndPoint(String endPoint) {
         RestAssured.basePath = endPoint;
-        System.out.println(endPoint);
     }
 
     //Reset Base URI (after test)
@@ -43,7 +41,7 @@ public class HelpersAPI {
         RestAssured.basePath = null;
     }
 
-    static Response createPaymentFromFrontToPhpIntegrationThenJavaServerRespondsUrlSandboxWithPayPalOneToken() {
+    static void createPaymentFromFrontToPhpIntegrationThenJavaServerRespondsUrlSandboxWithPayPalOneToken() {
         String basketData = "{\n  " +
                 "\"data\": {\n    " +
                 "\"payment_method\": 5,\n    " +
@@ -109,14 +107,14 @@ public class HelpersAPI {
                 "\"cancelUrl\": \"http://hermes-dev.devteam.win/-wiesbaden-5/1765/checkout?success=false\",\n  " +
                 "\"paymentSystem\": \"paypal\"\n}";
 
-        Response response =
-                given().header("Content-Type", "application/json")
-                        .body(basketData)
-                        .when()
-                        .post()
-                        .then()
-                        .log().all()
-                        .extract().response();
+        Response response = given()
+                .header("Content-Type", "application/json")
+                .body(basketData)
+                .when()
+                .post()
+                .then()
+                .log().all()
+                .extract().response();
 
         statusCode = response.getStatusCode();
         transactionID = response.jsonPath().get("transactionID");
@@ -124,22 +122,17 @@ public class HelpersAPI {
         System.out.println("statusCode" + statusCode);
         System.out.println("transactionID = " + transactionID);
         System.out.println("redirectURL = " + redirectURL);
-
-        return response;
     }
 
     static void checkStatusOfTransactionIdInPHPIntegration() {
-        System.out.println(RestAssured.baseURI + endPointStatus + transactionID);
-        Response response =
-                given().header("Content-Type", "application/json")
-                        .when()
-                        .get(endPointStatus + transactionID)
-                        .then()
-                        .log().all()
-                        .extract().response();
+        Response response = given()
+                .header("Content-Type", "application/json")
+                .when()
+                .get(RestAssured.baseURI + RestAssured.basePath + HelpersAPI.transactionID)
+                .then()
+                .log().all()
+                .extract().response();
+        statusCode = response.getStatusCode();
         status = response.jsonPath().get("status");
-        System.out.println("transactionID = " + transactionID);
-        System.out.println("status = " + status);
-
     }
 }
